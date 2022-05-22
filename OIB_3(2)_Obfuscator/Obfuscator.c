@@ -2,13 +2,27 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 #define DEFAULT_ERROR -1
+
 #define TRUE 1
 #define FALSE 0
+
 #define NEW_STR_MAX_LEN 28
+#define NEW_NAME_MAX_LEN 10
+
+#define LEN_INT_MAIN 10
+#define LEN_INT 3
+#define LEN_CHAR 4
+#define LEN_FLOAT 5
+#define LEN_BOOL 4
+#define LEN_FILE 4
+#define LEN_DOUBLE 5
+#define LEN_SHORT 5
+#define LEN_LONG 4
 
 #include <stdio.h>
 #include <windows.h>
 #include <string.h>
+#include <stdlib.h>
 
 struct info
 {
@@ -172,30 +186,238 @@ void add_mess(char* code, int size, struct info* resource)
 	fclose(mess);
 }
 
-void change_str(char* code, int size)
-{
-	int i = 0;
-	while (TRUE)
-	{
-		if (i + 1 == size) break;
-		if (code[i] == '"')
-		{
-			int count = i + 1;
-			while (code[count] != '"')
-			{
-				code[count]++;
-				count++;
-				if (count == size) return;
-			}
-			i = count + 1;
-		}
-		else i++;
-	}
-}
-
 void change_names(char* code, int size, struct info* resource)
 {
-	
+	FILE* names = fopen("names.txt", "r");
+	if (names == NULL)
+	{
+		system("cls");
+		printf("File Opening error.\nFile was expected: \"mess.txt\".\nCheck the source directory!\n");
+		exit(DEFAULT_ERROR);
+	}
+	char new_name[15] = { 0 };
+	int count = 0, diff = 0;
+	char* code_text = (char*)malloc(size * sizeof(char));
+	if (code_text != NULL)
+	{
+		int i = 0, iter = 0, check = 0;
+		while(TRUE)
+		{
+			if (i == size) break;
+			// Processing the int main()
+			if (code[i] == 'i' && code[i + 1] == 'n' && code[i + 2] == 't' && code[i + 3] == ' ' && code[i + 4] == 'm' && code[i + 5] == 'a' && code[i + 6] == 'i' && code[i + 7] == 'n' && code[i + 8] == '(')
+			{
+				for (int j = 0; j <= LEN_INT_MAIN; j++) code_text[iter + j] = code[i + j];
+				i += LEN_INT_MAIN + 1;
+				iter += LEN_INT_MAIN + 1;
+				check = 0;
+			}
+			// Processing the int or int*
+			if (code[i] == 'i' && code[i + 1] == 'n' && code[i + 2] == 't' && (code[i + 3] == ' ' || code[i + 3] == '*') && code[i + 4] != '(')
+			{
+				if (code[i + 3] == '*')
+				{
+					for (int j = 0; j <= LEN_INT + 1; j++) code_text[iter + j] = code[i + j];
+					i += LEN_INT + 2;
+					iter += LEN_INT + 2;
+				}
+				else if (code[i + 3] == ' ')
+				{
+					for (int j = 0; j <= LEN_INT; j++) code_text[iter + j] = code[i + j];
+					i += LEN_INT + 1;
+					iter += LEN_INT + 1;
+				}
+				check = 1;
+			}
+			// Processing the char or char*
+			else if (code[i] == 'c' && code[i + 1] == 'h' && code[i + 2] == 'a' && code[i + 3] == 'r' && (code[i + 4] == ' ' || code[i + 4] == '*') && code[i + 5] != '(')
+			{
+				if (code[i + 4] == '*')
+				{
+					for (int j = 0; j <= LEN_CHAR + 1; j++) code_text[iter + j] = code[i + j];
+					i += LEN_CHAR + 2;
+					iter += LEN_CHAR + 2;
+				}
+				else if (code[i + 4] == ' ')
+				{
+					for (int j = 0; j <= LEN_CHAR; j++) code_text[iter + j] = code[i + j];
+					i += LEN_CHAR + 1;
+					iter += LEN_CHAR + 1;
+				}
+				check = 1;
+			}
+			// Processing the float or float*
+			else if (code[i] == 'f' && code[i + 1] == 'l' && code[i + 2] == 'o' && code[i + 3] == 'a' && code[i + 4] == 't' && (code[i + 5] == ' ' || code[i + 5] == '*'))
+			{
+				if (code[i + 5] == '*')
+				{
+					for (int j = 0; j <= LEN_FLOAT + 1; j++) code_text[iter + j] = code[i + j];
+					i += LEN_FLOAT + 2;
+					iter += LEN_FLOAT + 2;
+				}
+				else if (code[i + 5] == ' ')
+				{
+					for (int j = 0; j <= LEN_FLOAT; j++) code_text[iter + j] = code[i + j];
+					i += LEN_FLOAT + 1;
+					iter += LEN_FLOAT + 1;
+				}
+				check = 1;
+			}
+			// Processing the double or double*
+			else if (code[i] == 'd' && code[i + 1] == 'o' && code[i + 2] == 'u' && code[i + 3] == 'b' && code[i + 4] == 'l' && code[i + 5] == 'e' && (code[i + 6] == ' ' || code[i + 6] == '*'))
+			{
+				if (code[i + 6] == '*')
+				{
+					for (int j = 0; j <= LEN_DOUBLE + 1; j++) code_text[iter + j] = code[i + j];
+					i += LEN_DOUBLE + 2;
+					iter += LEN_DOUBLE + 2;
+				}
+				else if (code[i + 6] == ' ')
+				{
+					for (int j = 0; j <= LEN_DOUBLE; j++) code_text[iter + j] = code[i + j];
+					i += LEN_DOUBLE + 1;
+					iter += LEN_DOUBLE + 1;
+				}
+				check = 1;
+			}
+			// Processing the short or short*
+			else if (code[i] == 's' && code[i + 1] == 'h' && code[i + 2] == 'o' && code[i + 3] == 'r' && code[i + 4] == 't' && (code[i + 5] == ' ' || code[i + 5] == '*'))
+			{
+				if (code[i + 5] == '*')
+				{
+					for (int j = 0; j <= LEN_SHORT + 1; j++) code_text[iter + j] = code[i + j];
+					i += LEN_SHORT + 2;
+					iter += LEN_SHORT + 2;
+				}
+				else if (code[i + 5] == ' ')
+				{
+					for (int j = 0; j <= LEN_SHORT; j++) code_text[iter + j] = code[i + j];
+					i += LEN_SHORT + 1;
+					iter += LEN_SHORT + 1;
+				}
+				check = 1;
+			}
+			// Processing the long or long*
+			else if (code[i] == 'l' && code[i + 1] == 'o' && code[i + 2] == 'n' && code[i + 3] == 'g' && (code[i + 4] == ' ' || code[i + 4] == '*') && code[i + 5] != 'd')
+			{
+				if (code[i + 4] == '*')
+				{
+					for (int j = 0; j <= LEN_LONG + 1; j++) code_text[iter + j] = code[i + j];
+					i += LEN_LONG + 2;
+					iter += LEN_LONG + 2;
+				}
+				else if (code[i + 4] == ' ')
+				{
+					for (int j = 0; j <= LEN_LONG; j++) code_text[iter + j] = code[i + j];
+					i += LEN_LONG + 1;
+					iter += LEN_LONG + 1;
+				}
+				check = 1;
+			}
+			else
+			{
+				code_text[iter] = code[i];
+				iter++;
+				i++;
+				check = 0;
+			}
+			// Save the current position
+			int save_i = i;
+			int save_iter = iter;
+			int vsize = 0;
+			char* variable = (char*)malloc(sizeof(char));
+			if (check == 1 && variable != NULL)
+			{
+				count = 0, vsize = 0;
+				while (code[i] != ' ' && code[i] != '[' && code[i] != '(' && code[i] != ',' && code[i] != ';' && code[i] != ')')
+				{
+					char* temp1 = (char*)realloc(variable, (vsize + 1) * sizeof(char));
+					if (temp1 != NULL)
+					{
+						variable = temp1;
+						variable[vsize] = code[i];
+						i++;
+						vsize++;
+					}
+				}
+				variable[vsize] = '\0';
+				fgets(new_name, sizeof(new_name), names);
+				new_name[strcspn(new_name, "\n")] = 0;
+				diff = NEW_NAME_MAX_LEN - vsize;
+				int control = 0;
+				char* temp2 = (char*)realloc(code_text, (size + diff) * sizeof(char));
+				if (temp2 != NULL)
+				{
+					code_text = temp2;
+					for (int j = 0; j < NEW_NAME_MAX_LEN; j++)
+					{
+						code_text[iter] = new_name[j];
+						iter++;
+					}
+				}
+				count++;
+				for (int j = i; j < size; j++)
+				{
+					control = 0;
+					for (int k = 0; k < vsize; k++)
+					{
+						if (code[j + k] == variable[k]) control = 1;
+						else
+						{
+							control = 0;
+							break;
+						}
+					}
+					if (control == 1 && (code[j + vsize] == ' ' || code[j + vsize] == '[' || code[j + vsize] == '(' || code[j + vsize] == ')' || code[j + vsize] == '+' || code[j + vsize] == ',' || code[j + vsize] == ';' || code[j + vsize] == ']'))
+					{
+						count++;
+						char* temp3 = (char*)realloc(code_text, (size + diff * count) * sizeof(char));
+						if (temp3 != NULL)
+						{
+							code_text = temp3;
+							for (int k = 0; k < NEW_NAME_MAX_LEN; k++)
+							{
+								code_text[iter] = new_name[k];
+								iter++;
+							}
+						}
+						j += vsize - 1;
+					}
+					else
+					{
+						code_text[iter] = code[j];
+						iter++;
+					}
+				}
+				int new_size = size + diff * count;
+				char* temp4 = (char*)realloc(code, new_size * sizeof(char));
+				if (temp4 != NULL)
+				{
+					code = temp4;
+					for (int i = 0; i < new_size; i++)
+					{
+						code[i] = code_text[i];
+					}
+				}
+				size = new_size;
+			}
+			i = save_i + vsize;
+			iter = save_iter + vsize;
+			i = iter;
+		}
+		resource->code = NULL;
+		char* tmp = (char*)realloc(resource->code, size * sizeof(char));
+		if (tmp != NULL)
+		{
+			resource->code = tmp;
+			for (int i = 0; i < size; i++)
+			{
+				resource->code[i] = code_text[i];
+			}
+		}
+		resource->size = size;
+	}
+	fclose(names);
 }
 
 int main()
@@ -207,11 +429,10 @@ int main()
 
 	delete_comments(resource.code, resource.size);
 	if (resource.code != NULL) resource.size = strlen(resource.code);
+	change_names(resource.code, resource.size, &resource);
 	add_mess(resource.code, resource.size, &resource);
 	delete_tabs(resource.code, resource.size);
 	delete_newline(resource.code, resource.size);
-	change_str(resource.code, resource.size);
-	//change_names(&resource);
 	
 	FILE* output = fopen("obfuscate_code.txt", "w");
 	printf("\nObfuscate code:\n");

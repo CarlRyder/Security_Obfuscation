@@ -1,25 +1,23 @@
-// Made by Y. Sendov. May 2022
-
 #define _CRT_SECURE_NO_WARNINGS
 #define DEFAULT_ERROR -1
 #define PASSWORD_SIZE 64
 #define CONSTANT 9
 #define TRUE 1
 #define FALSE 0
-
 #include <stdio.h>
 #include <windows.h>
 #include <string.h>
-
+// Made by Y. Sendov. May 2022
+// comment
 struct lines
 {
-	char* inp;
+	char* input;
 	char* password;
 };
-
+// comment
 int correct_pass(struct lines* strings)
 {
-	if (strcmp(strings->inp, strings->password) == 0) return 1;
+	if (strcmp(strings->input, strings->password) == 0) return 1;
 	else return 0;
 }
 
@@ -30,7 +28,7 @@ int get_size(FILE* pointer)
 	rewind(pointer);
 	return size;
 }
-
+// comment
 void xor_pass(struct lines* strings, int flag)
 {
 	if (flag == FALSE)
@@ -39,10 +37,10 @@ void xor_pass(struct lines* strings, int flag)
 	}
 	else
 	{
-		for (int i = 0; i < strlen(strings->inp); i++) strings->inp[i] ^= CONSTANT;
+		for (int i = 0; i < strlen(strings->input); i++) strings->input[i] ^= CONSTANT;
 	}
 }
-
+// comment
 void read_pass(struct lines* strings)
 {
 	FILE* file = fopen("pass.txt", "r");
@@ -53,17 +51,17 @@ void read_pass(struct lines* strings)
 		exit(DEFAULT_ERROR);
 	}
 	int pass_size = get_size(file);
-	char* passw = (char*)malloc(sizeof(char) * pass_size);
-	if (passw != NULL)
+	char* pass = malloc(sizeof(char) * pass_size);
+	if (pass != NULL)
 	{
-		for (int i = 0; i < pass_size; i++) passw[i] = fgetc(file);
-		passw[pass_size] = '\0';
+		for (int i = 0; i < pass_size; i++) pass[i] = fgetc(file);
+		pass[pass_size] = '\0';
 	}
 	fclose(file);
-	strings->password = passw;
+	strings->password = pass;
 	xor_pass(strings, FALSE);
 }
-
+// comment
 void input_pass(struct lines* strings)
 {
 	char input[PASSWORD_SIZE] = { 0 };
@@ -71,9 +69,9 @@ void input_pass(struct lines* strings)
 	fgets(input, PASSWORD_SIZE, stdin);
 	input[strcspn(input, "\n")] = 0;
 	fseek(stdin, 0, SEEK_END);
-	strings->inp = input;
+	strings->input = input;
 }
-
+// comment
 void check_pass(struct lines* strings)
 {
 	input_pass(strings);
@@ -88,7 +86,21 @@ void check_pass(struct lines* strings)
 		check_pass(strings);
 	}
 }
-
+/*void weeeeeer(struct lines* strings)
+{
+	input_pass(strings);
+	xor_pass(strings, TRUE);
+	if (correct_pass(strings) == 1)
+	{
+		printf("The password is correct. Access is allowed.\n");
+	}
+	else
+	{
+		printf("The password is incorrect. Try again!\n");
+		check_pass(strings);
+	}
+}*/
+// comment
 int main()
 {
 	struct lines strings = { NULL, NULL };
