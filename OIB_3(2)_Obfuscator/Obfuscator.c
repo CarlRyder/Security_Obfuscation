@@ -33,16 +33,29 @@ void read_code(struct info* resource)
 		printf("File Opening error.\nFile was expected: \"source.txt\".\nCheck the source directory!\n");
 		exit(DEFAULT_ERROR);
 	}
-	int code_size = get_size(file);
-	char* code_text = (char*)malloc(sizeof(char) * code_size);
+	char* code_text = (char*)malloc(sizeof(char));
 	if (code_text != NULL)
 	{
-		for (int i = 0; i < code_size; i++) code_text[i] = fgetc(file);
-		code_text[code_size] = '\0';
+		char symbol = fgetc(file);
+		unsigned int count = 0;
+		code_text[count] = symbol;
+		count++;
+		while (!feof(file))
+		{
+			symbol = fgetc(file);
+			char* temp = (char*)realloc(code_text, (count + 1) * sizeof(char));
+			if (temp != NULL)
+			{
+				code_text = temp;
+				code_text[count] = symbol;
+			}
+			count++;
+		}
+		code_text[count - 1] = '\0';
+		resource->size = count - 1;
+		resource->code = code_text;
 	}
 	fclose(file);
-	resource->code = code_text;
-	resource->size = code_size;
 }
 
 void delete_comments(char* code, int size)
@@ -165,39 +178,37 @@ void add_mess(struct info* resource)
 				iter++;
 			}
 		}
-		size = size + (NEW_STR_MAX_LEN - 1) * counter;
-		resource->code = NULL;
-		resource->code = (char*)malloc(size * sizeof(char));
-		resource->code = code;
-		resource->size = size;
-		/*printf("\nObfuscate code:\n");
-		for (int i = 0; i < size; i++)
+		size = size + (NEW_STR_MAX_LEN - 2) * counter;
+		char* temp = (char*)realloc(resource->code, size * sizeof(char));
+		if (temp != NULL)
 		{
-			printf("%c", code[i]);
+			resource->code = temp;
+			for (int i = 0; i < size; i++) resource->code[i] = code[i];
 		}
-		free(code);*/
+		resource->size = size;
 	}
 	fclose(mess);
 }
-// regex.h
+
 int main()
 {
 	struct info resource = { NULL, 0 };
 	read_code(&resource);
 	printf("Source code:\n");
-	for (int i = 0; i < resource.size; i++)
-	{
-		printf("%c", resource.code[i]);
-	}
+	for (int i = 0; i < resource.size; i++) printf("%c", resource.code[i]);
+
 	delete_comments(resource.code, resource.size);
 	delete_tabs(resource.code, resource.size);
 	delete_newline(resource.code, resource.size);
-	add_mess(&resource);
+	//add_mess(&resource);
 	//change_names(&resource);
 	
+	FILE* output = fopen("finale.txt", "w");
 	printf("\nObfuscate code:\n");
 	for (int i = 0; i < resource.size; i++)
 	{
 		printf("%c", resource.code[i]);
+		fprintf(output, "%c", resource.code[i]);
 	}
+	fclose(output);
 }
