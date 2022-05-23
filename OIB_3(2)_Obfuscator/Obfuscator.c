@@ -24,6 +24,7 @@
 #include <windows.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 struct info
 {
@@ -442,6 +443,7 @@ void change_names(char* code, int size, struct info* resource)
 
 int main()
 {
+	clock_t time_start = clock();
 	struct info resource = { NULL, 0 };
 	read_text(&resource);
 	printf("Source code:\n");
@@ -462,4 +464,7 @@ int main()
 		fprintf(output, "%c", resource.text_code[i]);
 	}
 	fclose(output);
+	clock_t time_end = clock();
+	double dtime = (time_end - time_start) * 1000 / CLOCKS_PER_SEC;
+	printf("\n\n Time spent on obfuscation of the program: %lf\n", dtime);
 }
